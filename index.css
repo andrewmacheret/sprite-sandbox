@@ -1,0 +1,15 @@
+html * {
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, Helvetica, sans-serif;
+}
+
+#body-wrapper {
+  text-align: center;
+}
+
+#container canvas {
+  border-color: lightsalmon;
+  border-style: ridge;
+  border-width: 4px;
+}
+
+
