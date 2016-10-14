@@ -4,7 +4,7 @@
 
 Move 2d characters with arrow keys in a sandbox. Uses [Pixi.js](http://www.pixijs.com/) and [jQuery](https://jquery.com/).
 
-See it running at [https://andrewmacheret.com/projects/sprites](https://andrewmacheret.com/projects/sprites).
+See it running at [https://andrewmacheret.com/projects/sprite-sandbox](https://andrewmacheret.com/projects/sprite-sandbox).
 
 Prereqs:
 * A web server (like [Apache](https://httpd.apache.org/)).
