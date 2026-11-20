@@ -1,80 +1,26 @@
-// from https://github.com/kittykatattack/learningPixi#keyboard
-function keyboard(keyCode) {
-  var key = {};
-  key.code = keyCode;
-  key.isDown = false;
-  key.isUp = true;
-  key.press = undefined;
-  key.release = undefined;
-  //The `downHandler`
-  key.downHandler = function(event) {
-    if (event.keyCode === key.code) {
-      if (key.isUp && key.press) key.press();
-      key.isDown = true;
-      key.isUp = false;
-    }
-    event.preventDefault();
-  };
-
-  //The `upHandler`
-  key.upHandler = function(event) {
-    if (event.keyCode === key.code) {
-      if (key.isDown && key.release) key.release();
-      key.isDown = false;
-      key.isUp = true;
-    }
-    event.preventDefault();
-  };
-
-  //Attach event listeners
-  window.addEventListener(
-    'keydown', key.downHandler.bind(key), false
-  );
-  window.addEventListener(
-    'keyup', key.upHandler.bind(key), false
-  );
-  return key;
-}
-
-$(function() {
-  var TextureCache = PIXI.utils.TextureCache;
-  var Rectangle = PIXI.Rectangle;
-  var Sprite = PIXI.Sprite;
-  var MovieClip = PIXI.extras.MovieClip;
-  var Container = PIXI.Container;
-  var Texture = PIXI.Texture;
-
-  var renderer = PIXI.autoDetectRenderer(400, 300, {backgroundColor: 0xdbd1b4, interactive: true});
-  $('#container').empty().append(renderer.view);
-
-  // create the root of the scene graph
-  var stage = new Container();
-
-  var spriteUrl = 'sprites.png';
-  PIXI.loader
-      .add(spriteUrl)
-      .load(setup);
-  
+(async function() {
   var directions = {
-    'right': {x: 1,  y: 0},
-    'up':    {x: 0,  y: -1},
-    'left':  {x: -1, y: 0},
-    'down':  {x: 0,  y: 1}
+    right: {x: 1,  y: 0},
+    up:    {x: 0,  y: -1},
+    left:  {x: -1, y: 0},
+    down:  {x: 0,  y: 1}
   };
+  // rows of each character in sprites.png, top to bottom
   var directionOrder = ['down', 'left', 'right', 'up'];
-  var directionKeys = {'left': 37, 'up': 38, 'right': 39, 'down': 40};
+  var directionKeys = {ArrowLeft: 'left', ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down'};
+
+  var app = new PIXI.Application();
+  await app.init({width: 400, height: 300, background: 0xdbd1b4});
+  document.getElementById('container').replaceChildren(app.canvas);
+
+  var sheet = await PIXI.Assets.load('sprites.png');
 
   var players = [];
   var playerId = 0;
 
-  var allSprites = [];
-  //Create the `tileset` sprite from the texture
-  
-  function setup() {
-    setupPlayers();
-    
-    setupEvents();
-  }
+  setupPlayers();
+  setupEvents();
+  app.ticker.add(animate);
 
   function setupPlayers() {
     var numPlayers = 7;
@@ -83,59 +29,53 @@ $(function() {
     var spritesPerPlayer = {x: 3, y: 4};
 
     for (var playerNum = 0; playerNum < numPlayers; playerNum++) {
-      (function() {
-        var offset = {
-          x: (playerNum % playersPerRow) * spriteSize.x * spritesPerPlayer.x,
-          y: Math.floor(playerNum / playersPerRow) * spriteSize.y * spritesPerPlayer.y
-        };
-        loadPlayer({
-          spriteSize: spriteSize,
-          spritesPerPlayer: spritesPerPlayer,
-          offset: offset,
-          playerNum: playerNum
-        });
-      })(); 
+      var offset = {
+        x: (playerNum % playersPerRow) * spriteSize.x * spritesPerPlayer.x,
+        y: Math.floor(playerNum / playersPerRow) * spriteSize.y * spritesPerPlayer.y
+      };
+      loadPlayer({
+        spriteSize: spriteSize,
+        spritesPerPlayer: spritesPerPlayer,
+        offset: offset,
+        playerNum: playerNum
+      });
     }
 
-    $.each(players, function(playerNum, player) {
-      drawPlayer(player);
-    });
+    players.forEach(drawPlayer);
   }
 
   function loadPlayer(options) {
-    var textureTile = TextureCache[spriteUrl];
     var playerNum = options.playerNum;
     var offset = options.offset;
     var spritesPerPlayer = options.spritesPerPlayer;
     var spriteSize = options.spriteSize;
 
     var textures = [];
-    for (var y=0; y<spritesPerPlayer.y; y++) {
+    for (var y = 0; y < spritesPerPlayer.y; y++) {
       textures[y] = [];
-      for (var x=0; x<spritesPerPlayer.x; x++) {
-        var rectangle = new Rectangle(offset.x + x * spriteSize.x, offset.y + y * spriteSize.y, spriteSize.x, spriteSize.y);
-        var texture = new Texture(textureTile);
-        texture.frame = rectangle;
+      for (var x = 0; x < spritesPerPlayer.x; x++) {
         textures[y].push({
-          texture: texture,
+          texture: new PIXI.Texture({
+            source: sheet.source,
+            frame: new PIXI.Rectangle(offset.x + x * spriteSize.x, offset.y + y * spriteSize.y, spriteSize.x, spriteSize.y)
+          }),
           time: 150
         });
       }
     }
 
+    // a standing sprite and a walking animation for each direction
     var sprites = {};
-    $.each(directions, function(directionName, coordinates) {
-      var y = directionOrder.indexOf(directionName);
-      sprites['face-' + directionName] = setupEventsOnSprite(new Sprite(textures[y][1].texture), playerNum);
-      sprites['walk-' + directionName] = setupEventsOnSprite(new MovieClip([ textures[y][0], textures[y][1], textures[y][2], textures[y][1] ]), playerNum);
+    Object.keys(directions).forEach(function(directionName) {
+      var row = textures[directionOrder.indexOf(directionName)];
+      sprites['face-' + directionName] = setupEventsOnSprite(new PIXI.Sprite(row[1].texture), playerNum);
+      sprites['walk-' + directionName] = setupEventsOnSprite(new PIXI.AnimatedSprite([row[0], row[1], row[2], row[1]]), playerNum);
     });
-    var spritesId = allSprites.length;
-    allSprites.push(sprites);
 
-    var player = {
-      spritesId: spritesId,
+    players.push({
+      sprites: sprites,
       sprite: function() {
-        return allSprites.length > this.spritesId ? allSprites[this.spritesId][this.state + '-' + this.direction] : null;
+        return this.sprites[this.state + '-' + this.direction];
       },
       lastSprite: null,
       position: {
@@ -143,7 +83,7 @@ $(function() {
         y: 32 + Math.floor(playerNum / 4) * 64
       },
       size: spriteSize,
-      movement: {'right': false, 'up': false, 'left': false, 'down': false},
+      movement: {right: false, up: false, left: false, down: false},
       movementStarted: null,
       direction: 'down',
       state: 'face',
@@ -156,7 +96,7 @@ $(function() {
       walk: function(directionName) {
         this.state = 'walk';
         this.animated = true;
-        if (!this.movementStarted) this.movementStarted = new Date();
+        if (!this.movementStarted) this.movementStarted = Date.now();
         this.direction = directionName;
       },
       stop: function() {
@@ -164,70 +104,62 @@ $(function() {
         this.animated = false;
         this.movementStarted = null;
       },
+      // starts slow and speeds up the longer you hold the key
       speed: function() {
         if (!this.movementStarted) return 0;
-        var millis = new Date() - this.movementStarted;
+        var millis = Date.now() - this.movementStarted;
         return this.speedInfo.initial + (Math.min(millis, this.speedInfo.rampUp) / this.speedInfo.rampUp) * (this.speedInfo.max - this.speedInfo.initial);
       }
-    }
-
-    players.push(player);
-  }
-
-  function setupEvents() {
-    $.each(directionKeys, function(directionName, keyCode) {
-      var key = keyboard(keyCode);
-      key.press = function() {
-        if (playerId < players.length) {
-          var player = players[playerId];
-          player.movement[directionName] = true;
-        }
-      };
-      key.release = function() {
-        if (playerId < players.length) {
-          var player = players[playerId];
-          player.movement[directionName] = false;
-        }
-      };
     });
   }
 
+  function setupEvents() {
+    function onKey(event, isDown) {
+      var directionName = directionKeys[event.key];
+      if (!directionName) return;
+      // stop arrow keys from scrolling the page
+      event.preventDefault();
+      if (playerId < players.length) {
+        players[playerId].movement[directionName] = isDown;
+      }
+    }
+    window.addEventListener('keydown', function(event) { onKey(event, true); });
+    window.addEventListener('keyup', function(event) { onKey(event, false); });
+  }
+
   function setupEventsOnSprite(sprite, playerNum) {
-      sprite.interactive = true;
-      sprite.buttonMode = true;
-      sprite.defaultCursor = 'pointer';
-      sprite.click = function() { changePlayer(playerNum); };
-      return sprite;
+    sprite.eventMode = 'static';
+    sprite.cursor = 'pointer';
+    sprite.on('pointertap', function() { changePlayer(playerNum); });
+    return sprite;
   }
 
   function drawPlayer(player) {
     var sprite = player.sprite();
-    if (!sprite) return;
 
     sprite.x = player.position.x;
     sprite.y = player.position.y;
-    
+
     if (sprite !== player.lastSprite) {
-      stage.removeChild(player.lastSprite);
+      if (player.lastSprite) app.stage.removeChild(player.lastSprite);
 
       if (player.animated) {
         sprite.play();
       }
 
-      stage.addChild(sprite);
+      app.stage.addChild(sprite);
     }
 
     player.lastSprite = sprite;
   }
 
-
-  function movePlayer(player) {
+  function movePlayer(player, frames) {
     var changeX = 0;
     var changeY = 0;
-    $.each(directions, function(directionName, coordinates) {
+    Object.keys(directions).forEach(function(directionName) {
       if (player.movement[directionName]) {
-        changeX += coordinates.x;
-        changeY += coordinates.y;
+        changeX += directions[directionName].x;
+        changeY += directions[directionName].y;
       }
     });
 
@@ -238,40 +170,33 @@ $(function() {
     } else {
       player.stop();
     }
-    
-    var speed = player.speed();
+
+    // frames is 1 at 60fps, so the speed is the same on faster screens
+    var speed = player.speed() * frames;
     player.position.x += changeX * speed;
     player.position.y += changeY * speed;
 
     player.position.x = Math.max(player.position.x, 0);
-    player.position.x = Math.min(player.position.x, renderer.width - player.size.x);
+    player.position.x = Math.min(player.position.x, app.screen.width - player.size.x);
     player.position.y = Math.max(player.position.y, 0);
-    player.position.y = Math.min(player.position.y, renderer.height - player.size.y);
+    player.position.y = Math.min(player.position.y, app.screen.height - player.size.y);
   }
 
   function changePlayer(newPlayerId) {
     if (playerId < players.length) {
-      var player = players[playerId];
-
-      player.stop();
+      players[playerId].stop();
+      // the old player isn't redrawn anymore, so make it stand still now
+      drawPlayer(players[playerId]);
     }
 
     playerId = newPlayerId;
   }
 
-  // start animating
-  animate();
-  function animate() {
-    requestAnimationFrame(animate);
-    
+  function animate(ticker) {
     if (playerId < players.length) {
       var player = players[playerId];
-      movePlayer(player);
+      movePlayer(player, ticker.deltaTime);
       drawPlayer(player);
     }
-
-    // render the container
-    renderer.render(stage);
   }
-
-});
+})();

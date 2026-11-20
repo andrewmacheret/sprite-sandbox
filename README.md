@@ -1,20 +1,20 @@
 # sprite-sandbox
 
-[![Build Status](https://travis-ci.org/andrewmacheret/sprite-sandbox.svg?branch=master)](https://travis-ci.org/andrewmacheret/sprite-sandbox) [![License](https://img.shields.io/badge/license-MIT-lightgray.svg)](https://github.com/andrewmacheret/sprite-sandbox/blob/master/LICENSE.md)
+[![Deploy](https://github.com/andrewmacheret/sprite-sandbox/actions/workflows/deploy.yml/badge.svg)](https://github.com/andrewmacheret/sprite-sandbox/actions/workflows/deploy.yml) [![License](https://img.shields.io/badge/license-MIT-lightgray.svg)](https://github.com/andrewmacheret/sprite-sandbox/blob/master/LICENSE.md)
 
-Move 2d characters with arrow keys in a sandbox. Uses [Pixi.js](http://www.pixijs.com/) and [jQuery](https://jquery.com/).
+Move 2d characters with arrow keys in a sandbox. Uses [PixiJS](https://pixijs.com/) 8, loaded from a CDN.
 
-See it running at [https://andrewmacheret.com/projects/sprite-sandbox](https://andrewmacheret.com/projects/sprite-sandbox).
+See it running at [https://andrewmacheret.com/projects/sprite-sandbox/](https://andrewmacheret.com/projects/sprite-sandbox/).
 
-Prereqs:
-* A web server (like [Apache](https://httpd.apache.org/)).
+## Run it locally
 
-Installation steps:
-* `git clone <clone url>`
+```
+cd www
+python3 -m http.server
+```
 
-Test it:
-* Open `index.html` in a browser.
- * For testing purposes, if you don't have a web server, running `python -m SimpleHTTPServer` in the project directory and navigating to [http://localhost:8000](http://localhost:8000) should do the trick.
-* You should see several sprites in an orange box. Use arrow keys to move a sprite, and click to change which sprite is being controlled.
-* To troubleshoot, look for javascript errors in the browser console.
+Then open [http://localhost:8000](http://localhost:8000). You should see several characters in an orange box. Click one, then use the arrow keys to move it.
 
+## Deploy
+
+Pushing to `master` runs [GitHub Actions](.github/workflows/deploy.yml), which syncs `www/` to `s3://andrewmacheret.com/projects/sprite-sandbox` and clears the CloudFront cache. It signs in to AWS with GitHub OIDC using the role in the `AWS_ROLE_ARN` repo variable.
