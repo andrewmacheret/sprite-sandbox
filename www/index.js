@@ -25,7 +25,9 @@
   var width = 400;
   var height = 300;
   var tileSize = 25;
-  var floorColor = 0xdbd1b4;
+  // the board colors from projects.css, so the floor matches the chess board
+  var floorColor = cssColor('--square-light');
+  var tileColor = cssColor('--square-dark');
   var discoColors = [0xf5c2d0, 0xc2dcf5, 0xcdf0c2, 0xf5e6b8, 0xdcc6f5];
   // how far apart characters are in the conga line
   var congaSpacing = 30;
@@ -58,8 +60,8 @@
   var bubbleLayer = new PIXI.Container();
   var selectionRing = new PIXI.Graphics()
     .ellipse(0, 0, 14, 6)
-    .fill({color: 0x1a7f37, alpha: 0.3})
-    .stroke({width: 1.5, color: 0x1a7f37});
+    .fill(cssColor('--selected'))
+    .stroke({width: 1.5, color: 0x0b0d0c, alpha: 0.35});
 
   app.stage.addChild(drawFloor(), selectionRing, shadowLayer, characterLayer, bubbleLayer);
 
@@ -70,6 +72,16 @@
   setupEvents();
   say(players[0], pick(lines.hello), performance.now(), true);
   app.ticker.add(animate);
+
+  // the browser turns any CSS color, even light-dark(), into rgb() that PixiJS can read
+  function cssColor(name) {
+    var probe = document.createElement('i');
+    probe.style.color = 'var(' + name + ')';
+    document.body.appendChild(probe);
+    var color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }
 
   function pick(list) {
     return list[Math.floor(Math.random() * list.length)];
@@ -86,7 +98,7 @@
         if ((x + y) / tileSize % 2) floor.rect(x, y, tileSize, tileSize);
       }
     }
-    return floor.fill({color: 0xcfc3a1, alpha: 0.45});
+    return floor.fill(tileColor);
   }
 
   function setupPlayers() {
@@ -137,7 +149,7 @@
       sprites['walk-' + directionName] = setupEventsOnSprite(new PIXI.AnimatedSprite([row[0], row[1], row[2], row[1]]), playerNum);
     });
 
-    var shadow = new PIXI.Graphics().ellipse(0, 0, 10, 4).fill({color: 0x3c2d14, alpha: 0.25});
+    var shadow = new PIXI.Graphics().ellipse(0, 0, 10, 4).fill({color: 0x0b0d0c, alpha: 0.25});
     shadowLayer.addChild(shadow);
 
     players.push({

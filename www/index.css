@@ -9,7 +9,7 @@
   overflow: hidden;
   aspect-ratio: 4 / 3;
   border-radius: 16px;
-  background: #dbd1b4;
+  background: var(--square-light);
   box-shadow: var(--media-shadow);
 }
 
@@ -19,7 +19,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: inset 0 0 40px rgb(60 45 20 / 0.25), inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  box-shadow: inset 0 0 40px rgb(11 13 12 / 0.25), inset 0 0 0 1px var(--board-border);
   pointer-events: none;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .loading {
-  color: #6b5d3f;
+  color: var(--board-border);
   font-weight: 600;
 }
 
