@@ -1,15 +1,376 @@
-html * {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Arial, Helvetica, sans-serif;
+/* Same look as the cube, Monty Hall and NHL pages, with a light version for light mode */
+
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bg: #0b1120;
+  --bg-gradient: radial-gradient(120% 70% at 50% 0%, #3b4a66 0%, #1e293b 45%, #0b1120 100%);
+  --text: #e2e8f0;
+  --bright: #f1f5f9;
+  --muted: #94a3b8;
+  --glass: rgb(255 255 255 / 0.05);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --control: rgb(255 255 255 / 0.08);
+  --control-border: rgb(255 255 255 / 0.14);
+  --control-hover: rgb(255 255 255 / 0.15);
+  --shadow: 0 20px 50px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --control-shadow: 0 8px 24px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.1);
+  --field-shadow: 0 12px 30px rgb(0 0 0 / 0.4);
+  --link: #c4b5fd;
+  --link-hover: #ddd6fe;
+  --focus: #a5b4fc;
+  color: var(--text);
+  background: var(--bg);
 }
 
-#body-wrapper {
-  text-align: center;
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #e2e8f0;
+    --bg-gradient: radial-gradient(120% 70% at 50% 0%, #ffffff 0%, #eef2f7 45%, #dbe3ee 100%);
+    --text: #334155;
+    --bright: #0f172a;
+    --muted: #64748b;
+    --glass: rgb(255 255 255 / 0.65);
+    --glass-border: rgb(15 23 42 / 0.08);
+    --control: rgb(255 255 255 / 0.8);
+    --control-border: rgb(15 23 42 / 0.12);
+    --control-hover: #fff;
+    --shadow: 0 20px 50px rgb(15 23 42 / 0.1), inset 0 1px 0 rgb(255 255 255 / 0.8);
+    --control-shadow: 0 6px 18px rgb(15 23 42 / 0.08);
+    --field-shadow: 0 10px 24px rgb(15 23 42 / 0.15);
+    --link: #6d28d9;
+    --link-hover: #7c3aed;
+    --focus: #6366f1;
+  }
 }
 
-#container canvas {
-  border-color: lightsalmon;
-  border-style: ridge;
-  border-width: 4px;
+html,
+body {
+  margin: 0;
+  min-height: 100%;
 }
 
+body {
+  min-height: 100dvh;
+  background: var(--bg-gradient) no-repeat;
+  background-color: var(--bg);
+}
 
+h1,
+p {
+  margin: 0;
+}
+
+a:link,
+a:visited {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.app {
+  box-sizing: border-box;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: max(1.5rem, env(safe-area-inset-top)) 1rem max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.header h1 {
+  color: var(--bright);
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.header p {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.header .bumps {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+.bumps strong {
+  color: var(--bright);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the glass card around the play area */
+
+.stage {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.field {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  background: #dbd1b4;
+  box-shadow: var(--field-shadow);
+}
+
+/* soft dark edges on top of the canvas */
+.field::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 40px rgb(60 45 20 / 0.25), inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+}
+
+.field canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* stop the page from scrolling when you tap a character */
+  touch-action: none;
+}
+
+.loading {
+  color: #6b5d3f;
+  font-weight: 600;
+}
+
+/* hint and arrow pad under the card */
+
+.dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.dock-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.toolbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  max-width: 24rem;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.hint-touch {
+  display: none;
+}
+
+/* phones and tablets don't have arrow keys */
+@media (hover: none) and (pointer: coarse) {
+  .hint-keys {
+    display: none;
+  }
+
+  .hint-touch {
+    display: inline;
+  }
+}
+
+kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.3rem;
+  border: 1px solid var(--control-border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--control);
+  color: var(--bright);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+kbd:first-child {
+  margin-left: 0;
+}
+
+kbd.wide {
+  padding: 0 0.45rem;
+}
+
+.dpad {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-columns: repeat(3, 3rem);
+  grid-template-rows: repeat(2, 3rem);
+  gap: 0.4rem;
+}
+
+.dpad .up {
+  grid-area: 1 / 2;
+}
+
+.dpad .left {
+  grid-area: 2 / 1;
+}
+
+.dpad .down {
+  grid-area: 2 / 2;
+}
+
+.dpad .right {
+  grid-area: 2 / 3;
+}
+
+/* pill and round buttons, same as the cube and Monty Hall pages */
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid var(--control-border);
+  border-radius: 999px;
+  background: var(--control);
+  box-shadow: var(--control-shadow);
+  color: var(--bright);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.15s;
+  /* holding a button on a phone shouldn't select text or open a menu */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.control:hover {
+  background: var(--control-hover);
+  transform: translateY(-1px);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.control.round {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.control svg {
+  flex-shrink: 0;
+}
+
+/* lights up while turned on, or while an arrow button or key is held */
+.control[aria-pressed='true'],
+.control.pressed {
+  border-color: transparent;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  box-shadow: 0 8px 24px rgb(99 102 241 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  color: #fff;
+}
+
+.control.pressed {
+  transform: scale(0.95);
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .stage {
+    padding: 0.6rem;
+    border-radius: 20px;
+  }
+
+  .field {
+    border-radius: 14px;
+  }
+
+  .dock {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .dock-main {
+    width: 100%;
+  }
+
+  .toolbar {
+    max-width: none;
+  }
+
+  .toolbar .control {
+    padding: 0.65rem 0.5rem;
+  }
+
+  .dpad {
+    grid-template-columns: repeat(3, 3.75rem);
+    grid-template-rows: repeat(2, 3.75rem);
+    gap: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .control {
+    transition: none;
+  }
+}

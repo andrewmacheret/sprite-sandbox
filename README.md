@@ -13,7 +13,9 @@ cd www
 python3 -m http.server
 ```
 
-Then open [http://localhost:8000](http://localhost:8000). You should see several characters in an orange box. Click one, then use the arrow keys to move it.
+Then open [http://localhost:8000](http://localhost:8000). You should see several characters on a tiled floor. Click one, then use the arrow keys (or the on-screen arrow buttons on a phone) to move it, and Space to jump.
+
+The buttons under the play area pick a random character, let everyone else wander around, line everyone up in a conga line behind you, or start a dance party. Characters bump into each other instead of walking through, and they'll tell you about it.
 
 ## Deploy
 
