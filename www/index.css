@@ -1,9 +1,5 @@
 /* Colors, cards, buttons and the footer come from https://andrewmacheret.com/projects.css */
 
-:root {
-  --field-shadow: 0 12px 30px light-dark(rgb(15 23 42 / 0.15), rgb(0 0 0 / 0.4));
-}
-
 /* the play area */
 
 .field {
@@ -14,7 +10,7 @@
   aspect-ratio: 4 / 3;
   border-radius: 16px;
   background: #dbd1b4;
-  box-shadow: var(--field-shadow);
+  box-shadow: var(--media-shadow);
 }
 
 /* soft dark edges on top of the canvas */
@@ -156,7 +152,7 @@ kbd.wide {
   border-color: transparent;
   background: var(--gradient);
   box-shadow: var(--gradient-shadow);
-  color: #fff;
+  color: var(--on-gradient);
   transform: scale(0.95);
 }
 

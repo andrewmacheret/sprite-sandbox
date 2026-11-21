@@ -58,8 +58,8 @@
   var bubbleLayer = new PIXI.Container();
   var selectionRing = new PIXI.Graphics()
     .ellipse(0, 0, 14, 6)
-    .fill({color: 0x8b5cf6, alpha: 0.3})
-    .stroke({width: 1.5, color: 0x8b5cf6});
+    .fill({color: 0x1a7f37, alpha: 0.3})
+    .stroke({width: 1.5, color: 0x1a7f37});
 
   app.stage.addChild(drawFloor(), selectionRing, shadowLayer, characterLayer, bubbleLayer);
 
@@ -312,7 +312,7 @@
 
     var label = new PIXI.Text({
       text: text,
-      style: {fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif', fontSize: 10, fontWeight: '700', fill: 0x1e293b}
+      style: {fontFamily: 'system-ui, -apple-system, Segoe UI, Roboto, sans-serif', fontSize: 10, fontWeight: '700', fill: 0x0b0d0c}
     });
     label.anchor.set(0.5, 1);
     var boxWidth = label.width + 10;
@@ -322,7 +322,7 @@
     var background = new PIXI.Graphics()
       .roundRect(-boxWidth / 2, -boxHeight - 4, boxWidth, boxHeight, 6)
       .fill(0xffffff)
-      .stroke({width: 1, color: 0x0f172a, alpha: 0.15})
+      .stroke({width: 1, color: 0x0b0d0c, alpha: 0.15})
       .poly([-3, -4.5, 3, -4.5, 0, 0])
       .fill(0xffffff);
 
