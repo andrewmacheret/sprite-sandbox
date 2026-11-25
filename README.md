@@ -19,7 +19,7 @@ The buttons under the play area pick a random character, let everyone else wande
 
 ## Health check
 
-[`/projects/sprite-sandbox/healthcheck/`](https://andrewmacheret.com/projects/sprite-sandbox/healthcheck/) checks the page and its scripts and styles, including PixiJS from jsDelivr. The Canary workflow (`.github/workflows/canary.yml`) opens it once a day, started by [andrewmacheret/canary](https://github.com/andrewmacheret/canary).
+Once a day, the Canary workflow (`.github/workflows/canary.yml`) checks the page and its scripts and styles, including PixiJS from jsDelivr. It's started by [andrewmacheret/canary](https://github.com/andrewmacheret/canary).
 
 ## Deploy
 
